@@ -1,65 +1,54 @@
-//run using g++ main.cpp -lglut -lGL -lglfw3 -lpthread -ldl -o outfilename
-//if we want to run functionality after OpenGL 1.1, we can use glfw
-#include <GL/glew.h> //glew needs to be before glfw
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-int main(void)
-{
-    GLFWwindow* window;
+int main(){
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
+    if(!glfwInit()){
+        //error
     }
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
 
-    /*vertex positions*/
-    float positions[] = {
-        -0.5,-0.5,
-         0.5,-0.5,
-         0.5, 0.5
+    glewInit();
+
+    GLFWwindow* window = glfwCreateWindow(640, 480, "VertexAttrib", NULL, NULL);
+
+    if(!window){
+        //error
+    }
+
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    float positions[6] = {
+        -0.5f, -0.5f,
+         0.5f, -0.5f,
+         0.0f,  0.5f
     };
 
-    /*Define a buffer, give it an ID, bind the buffer, Tell what data it has*/
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
-    
-    
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
 
-    /*Enable vertex attrip array, define vertex attributes - strides, type etc..*/
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
 
+    while(!glfwWindowShouldClose(window)){
 
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        glfwPollEvents();   
 
-        //used when we do not have an index buffer -> why?
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glDrawElements -> used with index buffer
+        glDrawArrays(GL_TRIANGLES, 0, 3);   
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
     }
 
+    glfwDestroyWindow(window);
+
     glfwTerminate();
+
     return 0;
 }
-
