@@ -90,8 +90,8 @@ int main(){
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    float positions[6] = {
-        -0.5f, -0.5f,
+    float positionsTraingle[6] = {
+        -0.5f, -0.5f, 
          0.5f, -0.5f,
          0.0f,  0.5f
     };
@@ -99,36 +99,73 @@ int main(){
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positionsTraingle, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
+
+    float positionsSquare[8] = {
+        -0.5f, -0.5f, 
+         0.5f, -0.5f,
+         0.5f,  0.5f,
+        -0.5f,  0.5f
+    };
+
+    unsigned int bufferSquare;
+    glGenBuffers(1, &bufferSquare);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferSquare);
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positionsSquare, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
+
+
+    float colorSquare[16] = {
+        1.0f, 0.0f, 0.0f, 1.0f, 
+        0.0f, 1.0f, 0.0f, 1.0f, 
+        0.0f, 0.0f, 1.0f, 1.0f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    unsigned int bufferSquarecolor;
+    glGenBuffers(1, &bufferSquarecolor);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferSquarecolor);
+    glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(float), colorSquare, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, 0);
 
     std::string vertexShader = 
         "#version 320 es\n"
         "precision mediump float;\n"
         "layout(location = 0) in vec4 position;\n"
+        "layout(location = 1) in vec4 in_color;\n"
+        "out vec4 out_color;\n" //sending color to next shader
         "void main()\n"
         "{\n"
         "gl_Position = position;\n"
+        "out_color = in_color;\n"
         "}\n";
 
     std::string fragmentShader = 
         "#version 320 es\n"
         "precision mediump float;\n"
         "layout(location = 0) out vec4 color;\n"
+        "in vec4 out_color;\n"
         "void main()\n"
         "{\n"
-        "color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "color = out_color;\n"
         "}\n";
 
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader);
+
     while(!glfwWindowShouldClose(window)){
 
         glfwPollEvents();   
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);   
+        glClear(GL_COLOR_BUFFER_BIT); //clears the screen every frame
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);   
 
         glfwSwapBuffers(window);
     }
