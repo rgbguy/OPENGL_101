@@ -1,19 +1,6 @@
-/*Draw call -> vertex shader -> fragment shader -> screen
-Vertex shader is called once per vertex. Primary purpose of Vertex shader
-is to tell OpenGL, where we want out vertex to be. We can access all our
-vertices in vertex shader. Once we access this position, we can tell opengl
-where we want to position this. Usage? -> say we have a camera, and we need
-to change the vertex position wrt to camera i.e. transformations!
-After vertex shader is called once per vertex, we move to fragment shader.
-Fragment shader runs per pixel once. Primary purpose of pixel shader -> decide
-which color the pixel should be. (just like a coloring book, where you have an
-outline and you need to fill color).
-For a triangle, vertex shader called 3 times, fragment shader can be called n
-number of times. Hence we need to take care what computation we do in what shaders
-to keep the number of computations less. (Think about performance!).
-Lighting can be calculated per pixel. 
-*/
+#include <math.h>       /* cos */
 
+#define PI 3.14159265
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -78,7 +65,8 @@ int main(){
 
     glewInit();
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "VertexAttrib", NULL, NULL);
+    
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Circle", NULL, NULL);
 
     if(!window){
         //error
@@ -87,64 +75,37 @@ int main(){
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
     glewInit();
+    glClearColor(0.2f, 0.3f, 1.0f, 1.0f);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-    float positionsTraingle[6] = {
-        -0.5f, -0.5f, 
-         0.5f, -0.5f,
-         0.0f,  0.5f
-    };
-
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positionsTraingle, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
-
-    float positionsSquare[8] = {
-        -0.5f, -0.5f, 
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
-    };
-
-    unsigned int bufferSquare;
-    glGenBuffers(1, &bufferSquare);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferSquare);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positionsSquare, GL_STATIC_DRAW);
+    float positionsCircle[360];
+    float r = 0.25;
+    for (int i = 0; i < 360; i=i+2)
+    {
+        positionsCircle[i] = r*cos ( i * PI / 180.0 );
+        positionsCircle[i+1] = r*sin ( i * PI / 180.0 );
+        std::cout << positionsCircle[i] << " " << positionsCircle[i+1] << std::endl;
+    }
+    
+    unsigned int bufferCircle;
+    glGenBuffers(1, &bufferCircle);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferCircle);
+    glBufferData(GL_ARRAY_BUFFER, 360 * sizeof(float), positionsCircle, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
 
-
-    float colorSquare[16] = {
-        1.0f, 0.0f, 0.0f, 1.0f, 
-        0.0f, 1.0f, 0.0f, 1.0f, 
-        0.0f, 0.0f, 1.0f, 1.0f, 
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    unsigned int bufferSquarecolor;
-    glGenBuffers(1, &bufferSquarecolor);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferSquarecolor);
-    glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(float), colorSquare, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, 0);
 
     std::string vertexShader = 
         "#version 320 es\n"
         "precision mediump float;\n"
         "layout(location = 0) in vec4 position;\n"
-        "layout(location = 1) in vec4 in_color;\n"
         "out vec4 out_color;\n" //sending color to next shader
+        "vec4 lightDir = vec4(1.0, 1.0, 0.0,1.0);\n"
         "void main()\n"
         "{\n"
         "gl_Position = position;\n"
-        "out_color = in_color;\n"
+        "float calculated = pow(dot(lightDir, position),2.0);\n"
+        "out_color = normalize(vec4(calculated,calculated,calculated,1.0f)) ;\n"
         "}\n";
 
     std::string fragmentShader = 
@@ -156,7 +117,7 @@ int main(){
         "{\n"
         "color = out_color;\n"
         "}\n";
-
+        
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader);
 
@@ -165,7 +126,7 @@ int main(){
         glfwPollEvents();   
 
         glClear(GL_COLOR_BUFFER_BIT); //clears the screen every frame
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);   
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 180);   
 
         glfwSwapBuffers(window);
     }
