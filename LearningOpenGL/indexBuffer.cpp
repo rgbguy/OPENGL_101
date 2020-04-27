@@ -1,3 +1,11 @@
+//NOTES: Index buffer is initialised like a normal vertex buffer EXCEPT....
+//GL_ELEMENT_ARRAY_BUFFER is used. and glDrawElements used instead of glDrawArray
+//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); 
+//6 is the number of indices
+//last param is nullptr as we have already bound the index buffer
+//otherwise we would have to give index buffer pointer
+//IMPORTANT: Index buffers need to be unsigned int!!! Always!
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -11,7 +19,7 @@ int main(){
 
     glewInit();
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "VertexAttrib", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Index Buffer", NULL, NULL);
 
     if(!window){
         //error
