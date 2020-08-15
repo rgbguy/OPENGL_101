@@ -32,15 +32,13 @@ int main(){
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     float positions[8] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
+        0.0f, 0.0f,  // lower-left corner  
+        1.0f, 0.0f,  // lower-right corner
+        0.5f, 1.0f   // top-center corner
     };
 
     unsigned int index[6] = {
         0, 1, 2,
-        2, 3, 0,
     };
 
     unsigned int buffer;
